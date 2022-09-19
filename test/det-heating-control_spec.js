@@ -90,29 +90,205 @@ describe('det-heating-control Node', function () {
         });
     });
 
-    it('should return Device', function (done) {
+    it('should return false for August 31, 2020 00:00:00 13 °C', function (done) {
 
         const flow = [
             {
                 id: "DetHeatingControl", type: "det-heating-control", name: "DetHeatingControlName", configText: JSON.stringify(heaterConfig),
-                testDate: 'August 31, 2020 00:00:00', wires: [["Relay"]]
+                testDate: 'August 31, 2020 00:00:00', wires: [["Relay1"], ["Relay2"], ["Relay3"], ["Relay4"]]
             },
-            { id: "Relay", type: "helper" }
+            { id: "Relay1", type: "helper" },
+            { id: "Relay2", type: "helper" },
+            { id: "Relay3", type: "helper" },
+            { id: "Relay4", type: "helper" },
 
         ];
 
 
         helper.load(lowerNode, flow, function () {
-            var helperNode = helper.getNode("Relay");
+            var helperNode1 = helper.getNode("Relay1");
+            var helperNode2 = helper.getNode("Relay2");
+            var helperNode3 = helper.getNode("Relay3");
+            var helperNode4 = helper.getNode("Relay4");
             var underTestNode = helper.getNode("DetHeatingControl");
 
-            helperNode.on("input", function (msg) {
+            helperNode1.on("input", function (msg) {
 
-                msg.should.have.property('payload', false);
+                msg.should.have.property('payload', "Off");
+
+            });
+
+            helperNode2.on("input", function (msg) {
+
+                msg.should.have.property('payload', "10");
+
+            });
+
+            helperNode3.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sun 20:00 10");
+
+            });
+
+            helperNode4.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Mon 01:00 6");
                 done();
             });
+
             underTestNode.receive({ payload: "13" });
         });
     });
+
+    it('should return true for August 31, 2020 00:00:00 9 °C', function (done) {
+
+        const flow = [
+            {
+                id: "DetHeatingControl", type: "det-heating-control", name: "DetHeatingControlName", configText: JSON.stringify(heaterConfig),
+                testDate: 'August 31, 2020 00:00:00', wires: [["Relay1"], ["Relay2"], ["Relay3"], ["Relay4"]]
+            },
+            { id: "Relay1", type: "helper" },
+            { id: "Relay2", type: "helper" },
+            { id: "Relay3", type: "helper" },
+            { id: "Relay4", type: "helper" },
+
+        ];
+
+
+        helper.load(lowerNode, flow, function () {
+            var helperNode1 = helper.getNode("Relay1");
+            var helperNode2 = helper.getNode("Relay2");
+            var helperNode3 = helper.getNode("Relay3");
+            var helperNode4 = helper.getNode("Relay4");
+            var underTestNode = helper.getNode("DetHeatingControl");
+
+            helperNode1.on("input", function (msg) {
+
+                msg.should.have.property('payload', "On");
+
+            });
+
+            helperNode2.on("input", function (msg) {
+
+                msg.should.have.property('payload', "10");
+
+            });
+
+            helperNode3.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sun 20:00 10");
+
+            });
+
+            helperNode4.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Mon 01:00 6");
+                done();
+            });
+
+            underTestNode.receive({ payload: "9" });
+        });
+    });
+
+    it('should return true for September 19, 2022 23:59:00 9 °C', function (done) {
+
+        const flow = [
+            {
+                id: "DetHeatingControl", type: "det-heating-control", name: "DetHeatingControlName", configText: JSON.stringify(heaterConfig),
+                testDate: 'September 19, 2022 23:59:00', wires: [["Relay1"], ["Relay2"], ["Relay3"], ["Relay4"]]
+            },
+            { id: "Relay1", type: "helper" },
+            { id: "Relay2", type: "helper" },
+            { id: "Relay3", type: "helper" },
+            { id: "Relay4", type: "helper" },
+
+        ];
+
+
+        helper.load(lowerNode, flow, function () {
+            var helperNode1 = helper.getNode("Relay1");
+            var helperNode2 = helper.getNode("Relay2");
+            var helperNode3 = helper.getNode("Relay3");
+            var helperNode4 = helper.getNode("Relay4");
+            var underTestNode = helper.getNode("DetHeatingControl");
+
+            helperNode1.on("input", function (msg) {
+
+                msg.should.have.property('payload', "On");
+
+            });
+
+            helperNode2.on("input", function (msg) {
+
+                msg.should.have.property('payload', "11");
+
+            });
+
+            helperNode3.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Mon 20:00 11");
+
+            });
+
+            helperNode4.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Tue 01:00 7");
+                done();
+            });
+
+            underTestNode.receive({ payload: "9" });
+        });
+    });
+
+    it('should return true for September 18, 2022 00:01:00 9 °C', function (done) {
+
+        const flow = [
+            {
+                id: "DetHeatingControl", type: "det-heating-control", name: "DetHeatingControlName", configText: JSON.stringify(heaterConfig),
+                testDate: 'September 18, 2022 00:01:00', wires: [["Relay1"], ["Relay2"], ["Relay3"], ["Relay4"]]
+            },
+            { id: "Relay1", type: "helper" },
+            { id: "Relay2", type: "helper" },
+            { id: "Relay3", type: "helper" },
+            { id: "Relay4", type: "helper" },
+
+        ];
+
+
+        helper.load(lowerNode, flow, function () {
+            var helperNode1 = helper.getNode("Relay1");
+            var helperNode2 = helper.getNode("Relay2");
+            var helperNode3 = helper.getNode("Relay3");
+            var helperNode4 = helper.getNode("Relay4");
+            var underTestNode = helper.getNode("DetHeatingControl");
+
+            helperNode1.on("input", function (msg) {
+
+                msg.should.have.property('payload', "On");
+
+            });
+
+            helperNode2.on("input", function (msg) {
+
+                msg.should.have.property('payload', "16");
+
+            });
+
+            helperNode3.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sat 20:00 16");
+
+            });
+
+            helperNode4.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sun 01:00 5");
+                done();
+            });
+
+            underTestNode.receive({ payload: "9" });
+        });
+    });
+
 
 });

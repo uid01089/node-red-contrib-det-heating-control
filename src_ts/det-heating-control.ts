@@ -1,20 +1,31 @@
-import { Node, Red, NodeProperties } from "node-red";
+import { NodeProperties, Red, Node } from "./node-red-types"
 import { HeatingController, CONFIG } from "./HeatingControler";
 
 
 
+interface MyNodeProperties extends NodeProperties {
+    configText: string;
+    testDate: string;
+}
+
+interface MyNode extends Node {
+    configText: string;
+    testDate: string;
+}
+
+
+
+
 const func = (RED: Red) => {
-    const detHeatingControl = function (config: NodeProperties) {
+    const detHeatingControl = function (config: MyNodeProperties) {
 
-        this.configText = (config as any).configText;
-        this.testDate = (config as any).testDate;
+        this.configText = config.configText;
+        this.testDate = config.testDate;
 
-        const node: Node = this;
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const node: MyNode = this;
 
         RED.nodes.createNode(node, config);
-
-
-
 
         /** 
          * Nodes register a listener on the input event 
@@ -25,28 +36,36 @@ const func = (RED: Red) => {
             // For maximum backwards compatibility, check that send exists.
             // If this node is installed in Node-RED 0.x, it will need to
             // fallback to using `node.send`
+            // eslint-disable-next-line prefer-spread, prefer-rest-params
             send = send || function () { node.send.apply(node, arguments) }
 
 
 
             //Throws a SyntaxError exception if the string to parse is not valid JSON.
-            const evaluatedConfig = JSON.parse((node as any).configText) as CONFIG;
+            const evaluatedConfig = JSON.parse(node.configText) as CONFIG;
             const heatingController = new HeatingController(evaluatedConfig);
 
 
 
             const inputTemperature = parseInt(msg.payload);
+
             if (inputTemperature !== undefined && inputTemperature !== null) {
 
-                const date = ((node as any).testDate !== undefined ? new Date((node as any).testDate) : new Date());
+                const date = (node.testDate !== undefined ? new Date(node.testDate) : new Date());
 
                 const targetTemperature = heatingController.getTargetTemp(date);
 
-                if (inputTemperature < targetTemperature) {
-                    send({ payload: true });
-                } else {
-                    send({ payload: false });
-                }
+                const currentIndex = targetTemperature.index;
+                const currentEntry = targetTemperature.dayConfig[currentIndex];
+                const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
+
+                const switchOnHeating = (inputTemperature < currentEntry.temperature ? "On" : "Off");
+
+                send([{ payload: switchOnHeating },
+                { payload: currentEntry.temperature.toString() },
+                { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
+                { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
+                ]);
 
 
 
@@ -71,7 +90,7 @@ const func = (RED: Red) => {
          * disconnecting from a remote system, they should register a listener 
          * on the close event.
         */
-        node.on('close', function (removed, done) {
+        node.on('close', function (removed: boolean, done: () => void) {
             if (removed) {
                 // This node has been disabled/deleted
             } else {

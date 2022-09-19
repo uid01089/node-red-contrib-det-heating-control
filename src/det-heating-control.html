@@ -75,7 +75,7 @@
             configText: { value: JSON.stringify(heaterConfig, null, 1) }
         },
         inputs: 1,
-        outputs: 1,
+        outputs: 4,
         icon: "file.png",
         label: function () {
             return this.name || "det-heating-control";
@@ -112,22 +112,229 @@
         Input is a message containing the current room temperature:
         <code>
         const testMsg = {
-            payload: '{"ZbReceived":{"0x6DBE":{"Device":"0x6DBE","Name":"TmpSens1","BatteryVoltage":3.005,"BatteryPercentage":100,"Voltage":3.005,"Battery":100,"Temperature":27.17,"Humidity":51.87,"Endpoint":1,"LinkQuality":39}}}'
-        };
+            payload: '13'
+                };
         </code>
         
         det-heating-control reads in the data and give as output the order to open or close the valve.
+
+        Config-Text spezifies the time and temperatur table
+        <code>
+            {
+                "Sun": [
+                 {
+                  "time": "01:00",
+                  "temperature": 5
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 10
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 15
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 20
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 15
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 10
+                 }
+                ],
+                "Mon": [
+                 {
+                  "time": "01:00",
+                  "temperature": 6
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 11
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 16
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 21
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 16
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 11
+                 }
+                ],
+                "Tue": [
+                 {
+                  "time": "01:00",
+                  "temperature": 7
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 12
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 17
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 22
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 17
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 12
+                 }
+                ],
+                "Wed": [
+                 {
+                  "time": "01:00",
+                  "temperature": 8
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 13
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 18
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 23
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 18
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 13
+                 }
+                ],
+                "Thu": [
+                 {
+                  "time": "01:00",
+                  "temperature": 9
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 14
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 19
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 24
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 19
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 14
+                 }
+                ],
+                "Fri": [
+                 {
+                  "time": "01:00",
+                  "temperature": 10
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 15
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 20
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 25
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 20
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 15
+                 }
+                ],
+                "Sat": [
+                 {
+                  "time": "01:00",
+                  "temperature": 11
+                 },
+                 {
+                  "time": "05:00",
+                  "temperature": 16
+                 },
+                 {
+                  "time": "10:00",
+                  "temperature": 21
+                 },
+                 {
+                  "time": "12:00",
+                  "temperature": 26
+                 },
+                 {
+                  "time": "17:00",
+                  "temperature": 21
+                 },
+                 {
+                  "time": "20:00",
+                  "temperature": 16
+                 }
+                ]
+               }
+        </code>
+
         <br>
         
         
     </p>
     <h3>Outputs</h3>
      <ol class="node-ports">
-         <li>Standard output
+         <li>OnOFF
              <dl class="message-properties">
                  <dt>Payload <span class="property-type">string</span></dt>
                  <dd>On/off of the controlled valve.</dd>
              </dl>
          </li>
+         <li>TargetTemp
+            <dl class="message-properties">
+                <dt>Payload <span class="property-type">string</span></dt>
+                <dd>Temperatur to be reached.</dd>
+            </dl>
+        </li>
+        <li>Current table entry
+            <dl class="message-properties">
+                <dt>Payload <span class="property-type">string</span></dt>
+                <dd>Current table entry which is active</dd>
+            </dl>
+        </li>         
+        <li>Next switching time
+            <dl class="message-properties">
+                <dt>Payload <span class="property-type">string</span></dt>
+                <dd>Next time table entry to be executed</dd>
+            </dl>
+        </li>         
      </ol>
 </script>

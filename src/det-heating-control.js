@@ -14,6 +14,7 @@ const func = (RED) => {
     const detHeatingControl = function (config) {
         this.configText = config.configText;
         this.testDate = config.testDate;
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;
         RED.nodes.createNode(node, config);
         /**
@@ -25,6 +26,7 @@ const func = (RED) => {
                 // For maximum backwards compatibility, check that send exists.
                 // If this node is installed in Node-RED 0.x, it will need to
                 // fallback to using `node.send`
+                // eslint-disable-next-line prefer-spread, prefer-rest-params
                 send = send || function () { node.send.apply(node, arguments); };
                 //Throws a SyntaxError exception if the string to parse is not valid JSON.
                 const evaluatedConfig = JSON.parse(node.configText);
@@ -33,12 +35,15 @@ const func = (RED) => {
                 if (inputTemperature !== undefined && inputTemperature !== null) {
                     const date = (node.testDate !== undefined ? new Date(node.testDate) : new Date());
                     const targetTemperature = heatingController.getTargetTemp(date);
-                    if (inputTemperature < targetTemperature) {
-                        send({ payload: true });
-                    }
-                    else {
-                        send({ payload: false });
-                    }
+                    const currentIndex = targetTemperature.index;
+                    const currentEntry = targetTemperature.dayConfig[currentIndex];
+                    const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
+                    const switchOnHeating = (inputTemperature < currentEntry.temperature ? "On" : "Off");
+                    send([{ payload: switchOnHeating },
+                        { payload: currentEntry.temperature.toString() },
+                        { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
+                        { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
+                    ]);
                 }
                 // Once finished, call 'done'.
                 // This call is wrapped in a check that 'done' exists

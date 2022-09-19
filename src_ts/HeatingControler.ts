@@ -1,24 +1,22 @@
 interface TIME_CONFIG {
-    time: string | number;
+    time: string;
     temperature: number;
+    timeMinutes: number;
+}
+
+interface TIME_CONFIG_DAY extends TIME_CONFIG {
+    day: string;
 }
 
 
 interface CONFIG {
-    Sun: TIME_CONFIG[];
-    Mon: TIME_CONFIG[];
-    Tue: TIME_CONFIG[];
-    Wed: TIME_CONFIG[];
-    Thu: TIME_CONFIG[];
-    Fri: TIME_CONFIG[];
-    Sat: TIME_CONFIG[];
+    [Day: string]: TIME_CONFIG[];
 }
-// https://dev.to/kingdaro/indexing-objects-in-typescript-1cgi
-// `keyof any` is short for "string | number | symbol"
-// since an object key can be any of those types, our key can too
-// in TS 3.0+, putting just "string" raises an error
-function hasKey<O>(obj: O, key: keyof any): key is keyof O {
-    return key in obj
+
+
+interface HeatingControllerResult {
+    index: number;
+    dayConfig: TIME_CONFIG_DAY[];
 }
 
 class HeatingController {
@@ -36,26 +34,59 @@ class HeatingController {
      * @returns {number}
      * @memberof HeatingController
      */
-    public getTargetTemp(date: Date): number {
+    public getTargetTemp(date: Date): HeatingControllerResult {
 
-        let temperature: number;
+
+        const result: HeatingControllerResult = {
+            index: 0,
+            dayConfig: []
+
+        };
+
 
         const day = date.getDay();
         const dayString = this.dayOfWeekAsString(day);
+        const dayStringPredecessor = this.dayOfWeekAsString(day - 1 + 7);
+        const dayStringSuccessor = this.dayOfWeekAsString(day + 1);
         const time = date.getHours() * 60 + date.getMinutes();
 
-        if (hasKey(this.config, dayString)) {
-            const dayConfig = this.config[dayString];
-            let runningElement = dayConfig.length - 1;
-            let runningTime: number;
 
-            do {
-                temperature = dayConfig[runningElement].temperature;
-                runningTime = dayConfig[runningElement].time as number;
-                runningElement--;
-            } while ((runningElement >= 0) && runningTime >= time);
+        const dayConfig = this.config[dayString];
+        const dayConfigPredecessor = this.config[dayStringPredecessor];
+        const dayConfigSuccessor = this.config[dayStringSuccessor];
+        const lastTimeConfigOfPredecessor = dayConfigPredecessor[dayConfigPredecessor.length - 1];
+        const fistTimeConfigOfSuccessor = dayConfigSuccessor[0];
+
+        const alignedTimeConfig: TIME_CONFIG_DAY[] = [];
+
+        // First add last time from predecessor als time 0
+        alignedTimeConfig.push({ temperature: lastTimeConfigOfPredecessor.temperature, time: lastTimeConfigOfPredecessor.time, timeMinutes: 0 - lastTimeConfigOfPredecessor.timeMinutes, day: dayStringPredecessor });
+
+        // 2nd all other time entries for this day
+        dayConfig.forEach(timeConfig => {
+            alignedTimeConfig.push({ temperature: timeConfig.temperature, time: timeConfig.time, timeMinutes: timeConfig.timeMinutes, day: dayString });
+        });
+
+
+        // Add First time from successor
+        alignedTimeConfig.push({ temperature: fistTimeConfigOfSuccessor.temperature, time: fistTimeConfigOfSuccessor.time, timeMinutes: 24 * 60 + fistTimeConfigOfSuccessor.timeMinutes, day: dayStringSuccessor });
+
+
+
+        let runningElement = 0;
+
+
+        // Running from front to back
+        while ((runningElement <= alignedTimeConfig.length) && (alignedTimeConfig[runningElement].timeMinutes < time)) {
+
+            result.dayConfig = alignedTimeConfig;
+            result.index = runningElement;
+
+            runningElement++;
         }
-        return temperature;
+
+
+        return result;
     }
 
     /**
@@ -70,24 +101,25 @@ class HeatingController {
         const returnConfig = {} as CONFIG;
 
         for (const dayId in config) {
-            if (hasKey(config, dayId)) {
-                const day = config[dayId];
-                returnConfig[dayId] = [];
 
-                day.forEach((time) => {
-                    const returnTime = {} as TIME_CONFIG;
-                    const timeString = time.time as string;
-                    const temperature = time.temperature;
+            const day = config[dayId];
+            returnConfig[dayId] = [];
 
-                    const timeMatcher = timeString.match(/(\d+):(\d+)/);
-                    const minutes = parseInt(timeMatcher[0]) * 60 + parseInt(timeMatcher[1]);
+            day.forEach((time) => {
+                const returnTime = {} as TIME_CONFIG;
+                const timeString = time.time as string;
+                const temperature = time.temperature;
 
-                    returnTime.temperature = temperature;
-                    returnTime.time = minutes;
+                const timeMatcher = timeString.match(/(\d+):(\d+)/);
+                const minutes = parseInt(timeMatcher[0]) * 60 + parseInt(timeMatcher[1]);
 
-                    returnConfig[dayId].push(returnTime);
-                });
-            }
+                returnTime.temperature = temperature;
+                returnTime.timeMinutes = minutes;
+                returnTime.time = timeString;
+
+                returnConfig[dayId].push(returnTime);
+            });
+
 
 
         }
@@ -97,8 +129,12 @@ class HeatingController {
     }
 
     private dayOfWeekAsString(dayIndex: number): string {
-        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",][dayIndex] || '';
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",][(dayIndex % 7)] || '';
+    }
+
+    private dayOfWeekAsIndix(dayAsString: string): number {
+        return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",].findIndex((value, index, obj) => { value === dayAsString });
     }
 }
 
-export { HeatingController, CONFIG }
+export { HeatingController, CONFIG, HeatingControllerResult }
