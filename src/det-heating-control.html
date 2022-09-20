@@ -72,7 +72,8 @@
         color: '#a6bbcf',
         defaults: {
             name: { value: "" },
-            configText: { value: JSON.stringify(heaterConfig, null, 1) }
+            configText: { value: JSON.stringify(heaterConfig, null, 1) },
+            debounceValue: { value: "1" },
         },
         inputs: 1,
         outputs: 4,
@@ -104,6 +105,10 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row">
+        <label for="node-input-debounceValue"><i class="fa fa-tag"></i> DebounceValue</label>
+        <input type="text" id="node-input-debounceValue" placeholder="DebounceValue">
+    </div>    
     <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-example-editor"></div>
 </script>
 

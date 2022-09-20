@@ -1,16 +1,19 @@
 import { NodeProperties, Red, Node } from "./node-red-types"
 import { HeatingController, CONFIG } from "./HeatingControler";
+import { SchmittTrigger } from "./SchmittTrigger";
 
 
 
 interface MyNodeProperties extends NodeProperties {
     configText: string;
     testDate: string;
+    debounceValue: string;
 }
 
 interface MyNode extends Node {
     configText: string;
     testDate: string;
+    schmittTrigger: SchmittTrigger;
 }
 
 
@@ -21,6 +24,8 @@ const func = (RED: Red) => {
 
         this.configText = config.configText;
         this.testDate = config.testDate;
+        this.schmittTrigger = new SchmittTrigger(parseInt(config.debounceValue));
+
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node: MyNode = this;
@@ -59,7 +64,8 @@ const func = (RED: Red) => {
                 const currentEntry = targetTemperature.dayConfig[currentIndex];
                 const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
 
-                const switchOnHeating = (inputTemperature < currentEntry.temperature ? "On" : "Off");
+                const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
+                const switchOnHeating = (!level ? "On" : "Off");
 
                 send([{ payload: switchOnHeating },
                 { payload: currentEntry.temperature.toString() },

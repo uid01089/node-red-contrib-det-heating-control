@@ -10,10 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const HeatingControler_1 = require("./HeatingControler");
+const SchmittTrigger_1 = require("./SchmittTrigger");
 const func = (RED) => {
     const detHeatingControl = function (config) {
         this.configText = config.configText;
         this.testDate = config.testDate;
+        this.schmittTrigger = new SchmittTrigger_1.SchmittTrigger(parseInt(config.debounceValue));
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;
         RED.nodes.createNode(node, config);
@@ -38,7 +40,8 @@ const func = (RED) => {
                     const currentIndex = targetTemperature.index;
                     const currentEntry = targetTemperature.dayConfig[currentIndex];
                     const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
-                    const switchOnHeating = (inputTemperature < currentEntry.temperature ? "On" : "Off");
+                    const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
+                    const switchOnHeating = (!level ? "On" : "Off");
                     send([{ payload: switchOnHeating },
                         { payload: currentEntry.temperature.toString() },
                         { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },

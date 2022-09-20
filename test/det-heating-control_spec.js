@@ -290,5 +290,55 @@ describe('det-heating-control Node', function () {
         });
     });
 
+    it('should return true for September 19, 2022 21:43:00 9 °C', function (done) {
+
+        const flow = [
+            {
+                id: "DetHeatingControl", type: "det-heating-control", name: "DetHeatingControlName", configText: JSON.stringify(heaterConfig),
+                testDate: 'September 19, 2022 21:43:00', wires: [["Relay1"], ["Relay2"], ["Relay3"], ["Relay4"]]
+            },
+            { id: "Relay1", type: "helper" },
+            { id: "Relay2", type: "helper" },
+            { id: "Relay3", type: "helper" },
+            { id: "Relay4", type: "helper" },
+
+        ];
+
+
+        helper.load(lowerNode, flow, function () {
+            var helperNode1 = helper.getNode("Relay1");
+            var helperNode2 = helper.getNode("Relay2");
+            var helperNode3 = helper.getNode("Relay3");
+            var helperNode4 = helper.getNode("Relay4");
+            var underTestNode = helper.getNode("DetHeatingControl");
+
+            helperNode1.on("input", function (msg) {
+
+                msg.should.have.property('payload', "On");
+
+            });
+
+            helperNode2.on("input", function (msg) {
+
+                msg.should.have.property('payload', "16");
+
+            });
+
+            helperNode3.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sat 20:00 16");
+
+            });
+
+            helperNode4.on("input", function (msg) {
+
+                msg.should.have.property('payload', "Sun 01:00 5");
+                done();
+            });
+
+            underTestNode.receive({ payload: "9" });
+        });
+    });
+
 
 });
