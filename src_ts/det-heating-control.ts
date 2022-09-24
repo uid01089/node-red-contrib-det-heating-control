@@ -83,7 +83,7 @@ const func = (RED: Red) => {
                 { payload: currentEntry.temperature.toString() },
                 { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
                 { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
-                { payload: influxElement },
+                { payload: [influxElement] },
                 ]);
 
 

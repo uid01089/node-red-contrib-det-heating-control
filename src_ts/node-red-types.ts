@@ -6,7 +6,7 @@ export interface NodeProperties {
 }
 
 export interface Message {
-    payload: string | InfluxDBBatchElement
+    payload: string | any
 }
 
 export interface Nodes {
