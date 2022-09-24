@@ -73,6 +73,7 @@ const func = (RED: Red) => {
                     measurement: "HeatingCtr_" + this.name,
                     fields: {
                         do_heating: !level,
+                        do_heating_0_100: !level ? 100 : 0,
                         current_temperature: inputTemperature,
                         target_temperature: currentEntry.temperature,
                     }
