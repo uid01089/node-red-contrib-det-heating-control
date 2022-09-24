@@ -47,7 +47,7 @@ const func = (RED) => {
                         fields: {
                             do_heating: !level,
                             current_temperature: inputTemperature,
-                            target_temperature: targetTemperature,
+                            target_temperature: currentEntry.temperature,
                         }
                     };
                     send([{ payload: switchOnHeating },
