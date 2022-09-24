@@ -1,10 +1,12 @@
+import { InfluxDBBatchElement } from "./InfluxDBBatchElement";
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NodeProperties {
 
 }
 
 export interface Message {
-    payload: string,
+    payload: string | InfluxDBBatchElement
 }
 
 export interface Nodes {

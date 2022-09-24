@@ -1,6 +1,8 @@
 import { NodeProperties, Red, Node } from "./node-red-types"
 import { HeatingController, CONFIG } from "./HeatingControler";
 import { SchmittTrigger } from "./SchmittTrigger";
+import { InfluxDBBatchElement } from "./InfluxDBBatchElement";
+
 
 
 
@@ -52,7 +54,7 @@ const func = (RED: Red) => {
 
 
 
-            const inputTemperature = parseInt(msg.payload);
+            const inputTemperature = parseInt(msg.payload as string);
 
             if (inputTemperature !== undefined && inputTemperature !== null) {
 
@@ -67,10 +69,21 @@ const func = (RED: Red) => {
                 const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
                 const switchOnHeating = (!level ? "On" : "Off");
 
+                const influxElement: InfluxDBBatchElement = {
+                    measurement: "HeatingCtr_" + this.name,
+                    fields: {
+                        do_heating: !level,
+                        current_temperature: inputTemperature,
+                        target_temperature: targetTemperature,
+                    }
+                };
+
+
                 send([{ payload: switchOnHeating },
                 { payload: currentEntry.temperature.toString() },
                 { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
                 { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
+                { payload: influxElement },
                 ]);
 
 

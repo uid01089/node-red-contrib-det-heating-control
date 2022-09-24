@@ -76,7 +76,7 @@
             debounceValue: { value: "1" },
         },
         inputs: 1,
-        outputs: 4,
+        outputs: 5,
         icon: "file.png",
         label: function () {
             return this.name || "det-heating-control";
@@ -340,6 +340,12 @@
                 <dt>Payload <span class="property-type">string</span></dt>
                 <dd>Next time table entry to be executed</dd>
             </dl>
-        </li>         
+        </li>      
+        <li>Influx data stream
+            <dl class="message-properties">
+                <dt>Payload <span class="property-type">influx data</span></dt>
+                <dd>Influx data stream</dd>
+            </dl>
+        </li>             
      </ol>
 </script>

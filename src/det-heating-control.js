@@ -42,10 +42,19 @@ const func = (RED) => {
                     const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
                     const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
                     const switchOnHeating = (!level ? "On" : "Off");
+                    const influxElement = {
+                        measurement: "HeatingCtr_" + this.name,
+                        fields: {
+                            do_heating: !level,
+                            current_temperature: inputTemperature,
+                            target_temperature: targetTemperature,
+                        }
+                    };
                     send([{ payload: switchOnHeating },
                         { payload: currentEntry.temperature.toString() },
                         { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
                         { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
+                        { payload: influxElement },
                     ]);
                 }
                 // Once finished, call 'done'.
