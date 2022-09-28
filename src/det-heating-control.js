@@ -15,7 +15,7 @@ const func = (RED) => {
     const detHeatingControl = function (config) {
         this.configText = config.configText;
         this.testDate = config.testDate;
-        this.schmittTrigger = new SchmittTrigger_1.SchmittTrigger(parseInt(config.debounceValue));
+        this.schmittTrigger = new SchmittTrigger_1.SchmittTrigger(parseFloat(config.debounceValue));
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;
         RED.nodes.createNode(node, config);
@@ -33,7 +33,7 @@ const func = (RED) => {
                 //Throws a SyntaxError exception if the string to parse is not valid JSON.
                 const evaluatedConfig = JSON.parse(node.configText);
                 const heatingController = new HeatingControler_1.HeatingController(evaluatedConfig);
-                const inputTemperature = parseInt(msg.payload);
+                const inputTemperature = parseFloat(msg.payload);
                 if (inputTemperature !== undefined && inputTemperature !== null) {
                     const date = (node.testDate !== undefined ? new Date(node.testDate) : new Date());
                     const targetTemperature = heatingController.getTargetTemp(date);

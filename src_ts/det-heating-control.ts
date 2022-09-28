@@ -26,7 +26,7 @@ const func = (RED: Red) => {
 
         this.configText = config.configText;
         this.testDate = config.testDate;
-        this.schmittTrigger = new SchmittTrigger(parseInt(config.debounceValue));
+        this.schmittTrigger = new SchmittTrigger(parseFloat(config.debounceValue));
 
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -54,7 +54,7 @@ const func = (RED: Red) => {
 
 
 
-            const inputTemperature = parseInt(msg.payload as string);
+            const inputTemperature = parseFloat(msg.payload as string);
 
             if (inputTemperature !== undefined && inputTemperature !== null) {
 
