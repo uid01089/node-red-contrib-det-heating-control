@@ -39,59 +39,62 @@ const func = (RED: Red) => {
          * to receive messages from the up-stream nodes in a flow.
         */
         node.on("input", async function (msg, send, done) {
-
-            // For maximum backwards compatibility, check that send exists.
-            // If this node is installed in Node-RED 0.x, it will need to
-            // fallback to using `node.send`
-            // eslint-disable-next-line prefer-spread, prefer-rest-params
-            send = send || function () { node.send.apply(node, arguments) }
-
-
-
-            //Throws a SyntaxError exception if the string to parse is not valid JSON.
-            const evaluatedConfig = JSON.parse(node.configText) as CONFIG;
-            const heatingController = new HeatingController(evaluatedConfig);
+            try {
+                // For maximum backwards compatibility, check that send exists.
+                // If this node is installed in Node-RED 0.x, it will need to
+                // fallback to using `node.send`
+                // eslint-disable-next-line prefer-spread, prefer-rest-params
+                send = send || function () { node.send.apply(node, arguments) }
 
 
 
-            const inputTemperature = parseFloat(msg.payload as string);
-
-            if (inputTemperature !== undefined && inputTemperature !== null) {
-
-                const date = (node.testDate !== undefined ? new Date(node.testDate) : new Date());
-
-                const targetTemperature = heatingController.getTargetTemp(date);
-
-                const currentIndex = targetTemperature.index;
-                const currentEntry = targetTemperature.dayConfig[currentIndex];
-                const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
-
-                const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
-                const switchOnHeating = (!level ? "On" : "Off");
-
-                const influxElement: InfluxDBBatchElement = {
-                    measurement: "HeatingCtr_" + this.name,
-                    fields: {
-                        do_heating: !level,
-                        do_heating_0_100: !level ? 100 : 0,
-                        current_temperature: inputTemperature,
-                        target_temperature: currentEntry.temperature,
-                    }
-                };
+                //Throws a SyntaxError exception if the string to parse is not valid JSON.
+                const evaluatedConfig = JSON.parse(node.configText) as CONFIG;
+                const heatingController = new HeatingController(evaluatedConfig);
 
 
-                send([{ payload: switchOnHeating },
-                { payload: currentEntry.temperature.toString() },
-                { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
-                { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
-                { payload: [influxElement] },
-                ]);
+
+                const inputTemperature = parseFloat(msg.payload as string);
+
+                if (inputTemperature !== undefined && inputTemperature !== null) {
+
+                    const date = (node.testDate !== undefined ? new Date(node.testDate) : new Date());
+
+                    const targetTemperature = heatingController.getTargetTemp(date);
+
+                    const currentIndex = targetTemperature.index;
+                    const currentEntry = targetTemperature.dayConfig[currentIndex];
+                    const nextEntry = targetTemperature.dayConfig[Math.min(currentIndex + 1, targetTemperature.dayConfig.length - 1)];
+
+                    const level = node.schmittTrigger.setValue(inputTemperature, currentEntry.temperature);
+                    const switchOnHeating = (!level ? "On" : "Off");
+
+                    const influxElement: InfluxDBBatchElement = {
+                        measurement: "HeatingCtr_" + this.name,
+                        fields: {
+                            do_heating: !level,
+                            do_heating_0_100: !level ? 100 : 0,
+                            current_temperature: inputTemperature,
+                            target_temperature: currentEntry.temperature,
+                        }
+                    };
 
 
+                    send([{ payload: switchOnHeating },
+                    { payload: currentEntry.temperature.toString() },
+                    { payload: currentEntry.day + " " + currentEntry.time + " " + currentEntry.temperature },
+                    { payload: nextEntry.day + " " + nextEntry.time + " " + nextEntry.temperature },
+                    { payload: [influxElement] },
+                    ]);
+
+
+
+                }
 
             }
-
-
+            catch (e: unknown) {
+                console.error(e);
+            }
 
             // Once finished, call 'done'.
             // This call is wrapped in a check that 'done' exists
