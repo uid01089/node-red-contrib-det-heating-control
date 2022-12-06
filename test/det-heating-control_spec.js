@@ -8,6 +8,7 @@ describe('det-heating-control Node', function () {
 
     beforeEach(function (done) {
         helper.startServer(done);
+        
     });
 
     afterEach(function (done) {

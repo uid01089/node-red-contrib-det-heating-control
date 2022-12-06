@@ -43,6 +43,13 @@
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Attach",
+            "port": 9229,
+            "request": "attach",
+            "type": "node"
         }
+
     ]
 }
